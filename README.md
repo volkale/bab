@@ -11,6 +11,9 @@ We refer to Kruschke's website on [BEST](http://www.indiana.edu/~kruschke/BEST/)
 
 This is a Python 3 library using [PyStan](https://pystan.readthedocs.io/en/latest/).
 
+Cf. also Andrew Straw's Python version of the BEST package: [link](https://github.com/strawlab/best),
+which uses [PyMC](https://github.com/pymc-devs/pymc) for MCMC sampling.
+
 ## Setup
 
 Create `conda` environment:
