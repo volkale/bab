@@ -11,6 +11,7 @@ setup(
     version='0.0.1',
     description='Bayesian estimation for A / B testing',
     author='Alexander Volkmann',
+    author_email='alexv@gmx.de',
     packages=['bab'],
     package_dir={'bab': 'bab'},
     package_data={'bab': ['tests/data/*.csv']},
