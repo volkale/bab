@@ -40,7 +40,7 @@ def get_mcmc(y1, y2, prior_hyper_params=None, warmup=1000, rand_seed=None):
         warmup=warmup,
         chains=3,
         control={'adapt_delta': 0.99},
-        seed=int(rand_seed)
+        seed=rand_seed
     )
 
     return mcmc
