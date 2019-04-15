@@ -11,8 +11,9 @@ logger.setLevel('INFO')
 plt.style.use('ggplot')
 
 
-def get_mcmc(y1, y2, prior_hyper_params=None, warmup=1000, rand_seed=None):
+def get_mcmc(stan_model, y1, y2, prior_hyper_params=None, warmup=1000, rand_seed=None):
     """
+    :param stan_model: StanModel instance
     :param y1: iterable, data from group 1 (test/active group)
     :param y2: iterable, data from group 2 (control/placebo group)
     :param prior_hyper_params: dict (optional), with keys 'muM', 'muP', 'sigmaLow', 'sigmaHigh'
@@ -28,12 +29,8 @@ def get_mcmc(y1, y2, prior_hyper_params=None, warmup=1000, rand_seed=None):
     except AssertionError:
         logging.error("both groups' sample size must be equal.", exc_info=True)
 
-    model_path = os.path.dirname(os.path.abspath(__file__))
-    model_file = os.path.join(model_path, 'model.stan')
-
     input_data = get_model_input(y1, y2, prior_hyper_params)
 
-    stan_model = pystan.StanModel(file=model_file)
     mcmc = stan_model.sampling(
         data=input_data,
         iter=warmup + 1000,
@@ -44,6 +41,16 @@ def get_mcmc(y1, y2, prior_hyper_params=None, warmup=1000, rand_seed=None):
     )
 
     return mcmc
+
+
+def get_stan_model():
+    """
+    :returns: compiled StanModel instance
+    """
+    model_path = os.path.dirname(os.path.abspath(__file__))
+    model_file = os.path.join(model_path, 'model.stan')
+    stan_model = pystan.StanModel(file=model_file)
+    return stan_model
 
 
 def get_model_input(y1, y2, prior_hyper_params):
