@@ -10,8 +10,11 @@ install:
   - pip install -r requirements_test.txt
   - pip install pytest-cov coveralls
 
+before_script:
+  - flake8 --show-source .
+
 script:
-  - pytest
+  - py.test --cov=bab .
 
 after_success:
   - coveralls
