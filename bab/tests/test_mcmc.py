@@ -19,8 +19,8 @@ def test_mcmc(stan_model, two_group_sample_data):
 
     mcmc = get_mcmc(stan_model, y1, y2, rand_seed=1)
 
-    row_ind_1 = list(mcmc.summary()['summary_rownames']).index('mu[0]')
-    row_ind_2 = list(mcmc.summary()['summary_rownames']).index('mu[1]')
+    row_ind_1 = list(mcmc.summary()['summary_rownames']).index('mu[1]')
+    row_ind_2 = list(mcmc.summary()['summary_rownames']).index('mu[2]')
     col_ind_m = list(mcmc.summary()['summary_colnames']).index('mean')
     col_ind_rh = list(mcmc.summary()['summary_colnames']).index('Rhat')
 
