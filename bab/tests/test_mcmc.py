@@ -2,11 +2,11 @@ import numpy as np
 from bab.mcmc import get_mcmc
 
 
-def test_mcmc_random_seed(two_group_sample_data):
+def test_mcmc_random_seed(stan_model, two_group_sample_data):
     y1, y2 = two_group_sample_data
 
-    mcmc1 = get_mcmc(y1, y2, warmup=100, rand_seed=1)
-    mcmc2 = get_mcmc(y1, y2, warmup=100, rand_seed=1)
+    mcmc1 = get_mcmc(stan_model, y1, y2, rand_seed=1)
+    mcmc2 = get_mcmc(stan_model, y1, y2, rand_seed=1)
 
     assert mcmc1.extract().keys() == mcmc2.extract().keys()
 
@@ -14,13 +14,13 @@ def test_mcmc_random_seed(two_group_sample_data):
         assert (mcmc1.extract()[parameter] == mcmc2.extract()[parameter]).all()
 
 
-def test_mcmc(two_group_sample_data):
+def test_mcmc(stan_model, two_group_sample_data):
     y1, y2 = two_group_sample_data
 
-    mcmc = get_mcmc(y1, y2, warmup=100, rand_seed=1)
+    mcmc = get_mcmc(stan_model, y1, y2, rand_seed=1)
 
-    row_ind_1 = list(mcmc.summary()['summary_rownames']).index('mu[1]')
-    row_ind_2 = list(mcmc.summary()['summary_rownames']).index('mu[2]')
+    row_ind_1 = list(mcmc.summary()['summary_rownames']).index('mu[0]')
+    row_ind_2 = list(mcmc.summary()['summary_rownames']).index('mu[1]')
     col_ind_m = list(mcmc.summary()['summary_colnames']).index('mean')
     col_ind_rh = list(mcmc.summary()['summary_colnames']).index('Rhat')
 

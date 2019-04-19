@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import norm
 
 
-def make_data(mu1, sigma1, mu2, sigma2, n_per_group, percent_outliers=0, sd_outlier_mfactor=2.0, rand_seed=None):
+def make_data(mu1, sigma1, mu2, sigma2, n_per_group, percent_outliers=0, sd_outlier_factor=2.0, rand_seed=None):
     """
     Auxiliary function for generating random values from a mixture of normal distibutions.
     :param mu1: mean of first group
@@ -13,7 +13,7 @@ def make_data(mu1, sigma1, mu2, sigma2, n_per_group, percent_outliers=0, sd_outl
     :param sigma2: standard deviation of second group
     :param n_per_group: number of samples per group
     :param percent_outliers: percentage of outliers to generate
-    :param sd_outlier_mfactor: factor to apply to sigma1, sigma2 to define outlier standard deviation
+    :param sd_outlier_factor: factor to apply to sigma1, sigma2 to define outlier standard deviation
     :param rand_seed (optimal), int
     :return: y1, y2
     """
@@ -25,8 +25,8 @@ def make_data(mu1, sigma1, mu2, sigma2, n_per_group, percent_outliers=0, sd_outl
 
     _validate_input(n, n_outliers, percent_outliers)
 
-    y1 = _generate_data(mu1, sigma1, n, n_outliers, sd_outlier_mfactor)
-    y2 = _generate_data(mu2, sigma2, n, n_outliers, sd_outlier_mfactor)
+    y1 = _generate_data(mu1, sigma1, n, n_outliers, sd_outlier_factor)
+    y2 = _generate_data(mu2, sigma2, n, n_outliers, sd_outlier_factor)
 
     return y1, y2
 
@@ -44,10 +44,10 @@ def _validate_input(n, n_outliers, percent_outliers):
         raise ValueError("Too few non-outliers.")
 
 
-def _generate_data(mu, sigma, n, n_outliers, sd_outlier_mfactor):
+def _generate_data(mu, sigma, n, n_outliers, sd_outlier_factor):
     y = norm.rvs(loc=mu, scale=sigma, size=n)
     if n_outliers > 0:
         y_out = norm.rvs(size=n_outliers)  # Random values for outliers
-        y_out = ((y_out - np.mean(y_out)) / np.std(y_out)) * (sigma * sd_outlier_mfactor) + mu  # Realize exactly.
+        y_out = ((y_out - np.mean(y_out)) / np.std(y_out)) * (sigma * sd_outlier_factor) + mu  # Realize exactly.
         y = np.concatenate([y, y_out])
     return y

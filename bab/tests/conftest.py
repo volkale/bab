@@ -1,4 +1,5 @@
 import pytest
+from bab.mcmc import get_stan_model
 
 
 @pytest.fixture
@@ -12,3 +13,9 @@ def two_group_sample_data():
     y2 = [3.88, 3.55, 3.29, 2.59, 2.33, 3.59]
 
     return y1, y2
+
+
+@pytest.fixture
+def stan_model():
+    stan_model_ = get_stan_model()
+    return stan_model_

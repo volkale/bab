@@ -89,7 +89,7 @@ def plot_posteriors(mcmc, parameter):
     assert parameter in ('mu', 'sigma', 'nu')
 
     if not parameter == 'nu':
-        _ = plt.hist(mcmc.extract()[parameter][:, 0], bins=100, density=True, alpha=0.5)
-        _ = plt.hist(mcmc.extract()[parameter][:, 1], bins=100, density=True, alpha=0.5)
+        _ = plt.hist(mcmc.extract()[parameter][:, 0], bins=100, density=True, alpha=0.5)  # NOQA
+        _ = plt.hist(mcmc.extract()[parameter][:, 1], bins=100, density=True, alpha=0.5)  # NOQA
     else:
-        _ = plt.hist(mcmc.extract()['nu'], bins=100, density=True, alpha=0.5)
+        _ = plt.hist(mcmc.extract()['nu'], bins=100, density=True, alpha=0.5)  # NOQA
