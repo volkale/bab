@@ -1,5 +1,9 @@
 # bab
 
+[![PyPI version](https://badge.fury.io/py/bab.svg)](https://badge.fury.io/py/bap)
+[![Build Status](https://travis-ci.com/volkale/bab.svg?token=9JgTwriYTrtamJ3cXPvS&branch=develop)](https://travis-ci.com/volkale/bab)
+[![codecov](https://codecov.io/gh/volkale/bab/branch/develop/graph/badge.svg)](https://codecov.io/gh/volkale/bab)
+
 Bayesian estimation for two groups (e.g. A/B testing and Randomized Experiments).
 
 Based on the paper
