@@ -11,11 +11,12 @@ Based on the paper
     John K. Kruschke, Bayesian estimation supersedes the t test., J Exp Psychol Gen. 2013
 
 and the corresponding R-package by its author.
-We refer to Kruschke's website on [BEST](http://www.indiana.edu/~kruschke/BEST/) for more information.
+We refer to [Kruschke's website](http://www.indiana.edu/~kruschke/BEST/) on
+[BEST](https://cran.r-project.org/web/packages/BEST/BEST.pdf) for more information.
 
 This is a Python 3 library using [PyStan](https://pystan.readthedocs.io/en/latest/).
 
-Cf. also Andrew Straw's Python version of the BEST package: [link](https://github.com/strawlab/best),
+Cf. also [Andrew Straw](https://strawlab.org/)'s Python version of the BEST package: [link](https://github.com/strawlab/best),
 which uses [PyMC](https://github.com/pymc-devs/pymc) for MCMC sampling.
 
 ## Setup
