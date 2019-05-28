@@ -79,7 +79,8 @@ def get_model_input(y1, y2, prior_hyper_params):
         'muM': params.get('muM', mu_m),
         'muP': params.get('muP', 100 * s_y),
         'sigmaLow': params.get('sigmaLow', s_y / 1000),
-        'sigmaHigh': params.get('sigmaHigh', s_y * 1000)
+        'sigmaHigh': params.get('sigmaHigh', s_y * 1000),
+        'run_estimation': 1
     }
 
     return input_data
