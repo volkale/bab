@@ -33,10 +33,6 @@ Clone `bab` repository to current directory:
 
     $ git clone git@github.com:volkale/bab.git
 
-Install all requirements:
+Install the `bab` package:
 
-    $ conda install --file requirements.txt --yes
-
-Now install the `bab` package:
-
-    $ python setup.py develop
+    $ make install
