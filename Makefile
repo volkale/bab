@@ -6,4 +6,4 @@ install:
 	pip install -r requirements_test.txt
 
 lint:
-	pytest --flake8
+	pytest bab --flake8

@@ -18,7 +18,7 @@ def get_pairs(mcmc):
         }
     )
 
-    _ = az.plot_pair(data, var_names=['mu', 'sigma', 'log_nu'], figsize=(10, 10))
+    _ = az.plot_pair(data, var_names=['mu', 'sigma', 'log_nu'], figsize=(10, 10))  # NOQA
     plt.show()
 
 
@@ -38,7 +38,7 @@ def get_forest(mcmc):
         }
     )
 
-    _ = az.plot_forest(
+    _ = az.plot_forest(  # NOQA
         data,
         var_names=['mu', 'sigma', 'log_nu'],
         credible_interval=0.95,
