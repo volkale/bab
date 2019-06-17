@@ -29,10 +29,17 @@ Activate the conda environment:
 
     $ source activate bab
 
-Clone `bab` repository to current directory:
+For the installation of the `bab` package via pip just run:
+
+    $ pip install bab
+
+
+Alternatively, clone the `bab` repository to current directory:
 
     $ git clone git@github.com:volkale/bab.git
 
-Install the `bab` package:
+Then install the `bab` package by running:
 
     $ make install
+
+This assumes that you have `make` installed on your system.
