@@ -12,6 +12,6 @@ mcmc = get_mcmc(stan_model, y1, y2)
 
 get_power(stan_model, y1, y2, 10, (-1., 1.), (0., 1.), 1., 1., n_sim=10)
 
-bab = BayesAB()
-bab.fit(2 * np.random.randn(10) + 3, np.random.randn(10))
-bab.plot_all()
+model = BayesAB()
+model.fit(2 * np.random.randn(10) + 3, np.random.randn(10))
+model.plot_all()

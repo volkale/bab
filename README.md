@@ -43,3 +43,25 @@ Then install the `bab` package by running:
     $ make install
 
 This assumes that you have `make` installed on your system.
+
+## Example
+```python
+import numpy as np
+from bab.model import BayesAB
+
+# generate some sample data
+np.random.seed(1)
+sample_size = 10
+y1 = 2 * np.random.randn(sample_size) + 3
+y2 = np.random.randn(sample_size)
+
+# create a BayesAB model object
+model = BayesAB()
+
+# fit the model with the data
+model.fit(y1, y2)
+
+# visualize inference and model diagnostics
+model.plot_all()
+
+```
