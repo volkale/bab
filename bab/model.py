@@ -1,6 +1,7 @@
+import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
-import arviz as az
+
 from bab.mcmc import get_stan_model, get_mcmc, plot_posteriors
 
 
@@ -8,7 +9,6 @@ class BayesAB:
     """
     Bayesian AB model class
     """
-
     def __init__(self, **kwargs):
         self.model = get_stan_model()
         self.mcmc_ = None
