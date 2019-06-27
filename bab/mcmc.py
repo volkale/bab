@@ -2,7 +2,8 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import pystan
+
+from bab.utils import stan_model_cache
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
@@ -49,7 +50,7 @@ def get_stan_model():
     """
     model_path = os.path.dirname(os.path.abspath(__file__))
     model_file = os.path.join(model_path, 'model.stan')
-    stan_model = pystan.StanModel(file=model_file)
+    stan_model = stan_model_cache(model_file)
     return stan_model
 
 
