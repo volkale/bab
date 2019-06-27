@@ -36,7 +36,7 @@ class BayesAB:
         )
 
     def plot_posteriors(self, parameter=None, **kwargs):
-        if not self.mcmc_:
+        if not (self.mcmc_ and self.data_):
             raise AttributeError('Object needs to be fit first.')
         if parameter:
             plot_posteriors(self.mcmc_, parameter)
@@ -45,15 +45,15 @@ class BayesAB:
             kwargs['ref_val'] = kwargs.get('ref_val', {})
 
             sample_dict = self.mcmc_.extract()
-            _, ax = plt.subplots(3, 3, figsize=(21, 14))
+            _, ax = plt.subplots(3, 3, figsize=(21, 15))
 
             for i, param in enumerate(['mu', 'sigma']):
 
                 self._add_posterior_plot(sample_dict, 'mu', ax[0, i], idx=i)
-                ax[0, i].set_title('$\mu_{}$'.format(i+1))
+                ax[0, i].set_title('$\mu_{}$'.format(i + 1))
 
                 self._add_posterior_plot(sample_dict, 'sigma', ax[1, i], idx=i)
-                ax[1, i].set_title('$\sigma_{}$'.format(i+1))
+                ax[1, i].set_title('$\sigma_{}$'.format(i + 1))
 
                 _ = az.plot_posterior(  # NOQA
                     sample_dict[param][:, 0] - sample_dict[param][:, 1],
@@ -92,3 +92,46 @@ class BayesAB:
             credible_interval=0.95,
             ax=ax_
         )
+
+    def plot_posterior_predictive(self):
+        if not (self.mcmc_ and self.data_):
+            raise AttributeError('Object needs to be fit first.')
+        else:
+            _ = az.plot_ppc(  # NOQA
+                self.data_,
+                data_pairs={'y1': 'y1_pred', 'y2': 'y2_pred'},
+                figsize=(14, 5),
+            )
+            plt.show()
+
+    def plot_pairs(self):
+        if not (self.mcmc_ and self.data_):
+            raise AttributeError('Object needs to be fit first.')
+        else:
+            _ = az.plot_pair(  # NOQA
+                self.data_,
+                var_names=['mu', 'sigma', 'log_nu'],
+                figsize=(10, 10)
+            )
+            plt.show()
+
+    def plot_forest(self):
+        if not (self.mcmc_ and self.data_):
+            raise AttributeError('Object needs to be fit first.')
+        else:
+            _ = az.plot_forest(  # NOQA
+                self.data_,
+                var_names=['mu', 'sigma', 'log_nu'],
+                credible_interval=0.95,
+                figsize=(10, 10)
+            )
+            plt.show()
+
+    def plot_all(self):
+        self.plot_posteriors()
+        self.plot_posterior_predictive()
+        self.plot_pairs()
+        self.plot_forest()
+
+    def print_summary(self):
+        print(self.mcmc_.stansummary())
