@@ -50,10 +50,10 @@ class BayesAB:
             for i, param in enumerate(['mu', 'sigma']):
 
                 self._add_posterior_plot(sample_dict, 'mu', ax[0, i], idx=i)
-                ax[0, i].set_title(f'$\mu_{i+1}$')
+                ax[0, i].set_title('$\mu_{}$'.format(i+1))
 
                 self._add_posterior_plot(sample_dict, 'sigma', ax[1, i], idx=i)
-                ax[1, i].set_title(f'$\sigma_{i+1}$')
+                ax[1, i].set_title('$\sigma_{}$'.format(i+1))
 
                 _ = az.plot_posterior(  # NOQA
                     sample_dict[param][:, 0] - sample_dict[param][:, 1],
