@@ -17,6 +17,8 @@ class BayesAB:
         self.kwargs = kwargs
         for key, value in kwargs.items():
             setattr(self, key, value)
+        self.rope = kwargs.get('rope', {})
+        self.ref_val = kwargs.get('ref_val', {})
 
     def fit(self, y1, y2):
         self.mcmc_ = get_mcmc(self.model, y1, y2, **self.kwargs)
@@ -35,15 +37,12 @@ class BayesAB:
             }
         )
 
-    def plot_posteriors(self, parameter=None, **kwargs):
+    def plot_posteriors(self, parameter=None):
         if not (self.mcmc_ and self.data_):
             raise AttributeError('Object needs to be fit first.')
         if parameter:
             plot_posteriors(self.mcmc_, parameter)
         else:
-            kwargs['rope'] = kwargs.get('rope', {})
-            kwargs['ref_val'] = kwargs.get('ref_val', {})
-
             sample_dict = self.mcmc_.extract()
             _, ax = plt.subplots(3, 3, figsize=(21, 15))
 
@@ -59,8 +58,8 @@ class BayesAB:
                     sample_dict[param][:, 0] - sample_dict[param][:, 1],
                     credible_interval=0.95,
                     ax=ax[i, 2],
-                    ref_val=kwargs['ref_val'].get(param),
-                    rope=kwargs['rope'].get(param)
+                    ref_val=self.ref_val.get(param),
+                    rope=self.rope.get(param)
                 )
 
             _ = ax[0, 2].set_title('$\mu_1 - \mu_2$')
