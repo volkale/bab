@@ -133,4 +133,7 @@ class BayesAB:
         self.plot_forest()
 
     def print_summary(self):
-        print(self.mcmc_.stansummary())
+        if not (self.mcmc_ and self.data_):
+            raise AttributeError('Object needs to be fit first.')
+        else:
+            print(self.mcmc_.stansummary())
