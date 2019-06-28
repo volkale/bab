@@ -56,7 +56,7 @@ y1 = 2 * np.random.randn(sample_size) + 3
 y2 = np.random.randn(sample_size)
 
 # create a BayesAB model object
-model = BayesAB()
+model = BayesAB(rand_seed=1)
 
 # fit the model with the data
 model.fit(y1, y2)
