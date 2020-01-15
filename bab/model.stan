@@ -1,7 +1,8 @@
 data {
-    int<lower=0> N;                       // number of samples per group
-    real y1[N];                           // outcome in group 1
-    real y2[N];                           // outcome in group 2
+    int<lower=0> N1;                       // number of samples from group 1
+    int<lower=0> N2;                       // number of samples from group 2
+    real y1[N1];                           // outcome in group 1
+    real y2[N2];                           // outcome in group 2
     real muM;                             // mean of y
     real<lower=0> muP;                    // default choice: 100 * sd_y
     real<lower=0> sigmaLow;               // default choice: sd_y / 1000
@@ -35,14 +36,16 @@ model {
 }
 
 generated quantities {
-    real y1_pred[N];
-    real y2_pred[N];
-    real log_lik[2, N];
+    real y1_pred[N1];
+    real y2_pred[N2];
+    real log_lik[N1 + N2];
 
-    for (j in 1:N) {
+    for (j in 1:N1) {
         y1_pred[j] = student_t_rng(nu, mu[1], sigma[1]);
+        log_lik[j] = student_t_lpdf(y1[j] | nu, mu[1], sigma[1]);
+    }
+    for (j in 1:N2) {
         y2_pred[j] = student_t_rng(nu, mu[2], sigma[2]);
-        log_lik[1, j] = student_t_lpdf(y1[j] | nu, mu[1], sigma[1]);
-        log_lik[2, j] = student_t_lpdf(y2[j] | nu, mu[2], sigma[2]);
+        log_lik[N1 + j] = student_t_lpdf(y2[j] | nu, mu[2], sigma[2]);
     }
 }

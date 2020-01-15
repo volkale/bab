@@ -74,7 +74,8 @@ def get_model_input(y1, y2, prior_hyper_params):
     s_y = np.sqrt(((nt - 1) * np.var(y1, ddof=1) + (nc - 1) * np.var(y2, ddof=1)) / (nt + nc - 2))
 
     input_data = {
-        'N': nt,
+        'N1': nt,
+        'N2': nc,
         'y1': y1,
         'y2': y2,
         'muM': params.get('muM', mu_m),
