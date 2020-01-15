@@ -6,7 +6,7 @@ from scipy.stats import norm
 
 def make_data(mu1, sigma1, mu2, sigma2, n_per_group, percent_outliers=0, sd_outlier_factor=2.0, rand_seed=None):
     """
-    Auxiliary function for generating random values from a mixture of normal distibutions.
+    Auxiliary function for generating random values from a mixture of normal distributions.
     :param mu1: mean of first group
     :param sigma1: standard deviation of first group
     :param mu2: mean of second group
