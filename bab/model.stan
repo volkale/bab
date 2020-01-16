@@ -3,11 +3,11 @@ data {
     int<lower=0> N2;                       // number of samples from group 2
     real y1[N1];                           // outcome in group 1
     real y2[N2];                           // outcome in group 2
-    real muM;                             // mean of y
-    real<lower=0> muP;                    // default choice: 100 * sd_y
-    real<lower=0> sigmaLow;               // default choice: sd_y / 1000
-    real<lower=0> sigmaHigh;              // default choice: sd_y * 1000
-    int<lower=0, upper=1> run_estimation; // flag whether to sample for posterior or from prior
+    real muM;                              // mean of y
+    real<lower=0> muP;                     // default choice: 100 * sd_y
+    real<lower=0> sigmaLow;                // default choice: sd_y / 1000
+    real<lower=0> sigmaHigh;               // default choice: sd_y * 1000
+    int<lower=0, upper=1> run_estimation;  // flag whether to sample for posterior or from prior
 }
 
 parameters {
