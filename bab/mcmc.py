@@ -25,10 +25,6 @@ def get_mcmc(stan_model, y1, y2, prior_hyper_params=None, warmup=1000, rand_seed
 
     if rand_seed is not None:
         np.random.seed(int(rand_seed))
-    try:
-        assert len(y1) == len(y2)
-    except AssertionError:
-        logging.error("both groups' sample size must be equal.", exc_info=True)
 
     input_data = get_model_input(y1, y2, prior_hyper_params)
 
