@@ -96,6 +96,8 @@ class BayesAB:
         if not (self.mcmc_ and self.data_):
             raise AttributeError('Object needs to be fit first.')
         else:
+            if self.data_.posterior_predictive.y1_pred.shape[-1] != self.data_.posterior_predictive.y2_pred.shape[-1]:
+                raise NotImplementedError('y1 and y2 need to be of same length.')
             _ = az.plot_ppc(  # NOQA
                 self.data_,
                 data_pairs={'y1': 'y1_pred', 'y2': 'y2_pred'},
@@ -128,9 +130,9 @@ class BayesAB:
 
     def plot_all(self):
         self.plot_posteriors()
-        self.plot_posterior_predictive()
         self.plot_pairs()
         self.plot_forest()
+        self.plot_posterior_predictive()
 
     def print_summary(self):
         if not (self.mcmc_ and self.data_):
