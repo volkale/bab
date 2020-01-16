@@ -34,6 +34,7 @@ def get_mcmc(stan_model, y1, y2, prior_hyper_params=None, warmup=1000, rand_seed
         warmup=warmup,
         chains=3,
         control={'adapt_delta': 0.99},
+        check_hmc_diagnostics=True,
         seed=rand_seed
     )
 
