@@ -12,7 +12,7 @@ logger.setLevel('INFO')
 
 
 def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m, max_hdi_width_sd,
-              cred_mass=0.95, n_sim=1000):
+              cred_mass=0.95, n_sim=200, precision=2):
     """
     :param stan_model: StanModel instance
     :param y1: iterable, prospective samples of group one
@@ -26,6 +26,7 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
     :param max_hdi_width_sd: float, maximum desired width of the 95% HDI on the difference of standard deviations.
     :param cred_mass: (optional) float, fraction of credible mass.
     :param n_sim: (optional) int, number of simulated experiments used to estimate the power.
+    :param precision: (optional) int, number of decimals to round the power statistics to.
     :return: power, dict
     """
     mcmc = get_mcmc(stan_model, y1, y2)
@@ -90,6 +91,9 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
         if n_sim % 100 == 0:
             logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
             logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
+
+    for k, v in power.items():
+        power[k] = [round(e, precision) for e in v]
 
     return power
 
