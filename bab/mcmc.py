@@ -19,7 +19,7 @@ def get_mcmc(stan_model, y1, y2, prior_hyper_params=None, warmup=1000, rand_seed
     :param y2: iterable, data from group 2 (control/placebo group)
     :param prior_hyper_params: dict (optional), with keys 'muM', 'muP', 'sigmaLow', 'sigmaHigh'
     :param warmup: int (optional), number of burnin samples to use, defaults to 1000
-    :param rand_seed: int (optional), number of burnin samples to use, defaults to 1000
+    :param rand_seed: int (optional), random seed
     :returns: StanFit4Model instance containing the fitted results
     """
 

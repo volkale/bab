@@ -12,7 +12,7 @@ logger.setLevel('INFO')
 
 
 def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m, max_hdi_width_sd,
-              cred_mass=0.95, n_sim=200, precision=2):
+              cred_mass=0.95, n_sim=200, precision=2, rand_seed=None):
     """
     :param stan_model: StanModel instance
     :param y1: iterable, prospective samples of group one
@@ -27,9 +27,13 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
     :param cred_mass: (optional) float, fraction of credible mass.
     :param n_sim: (optional) int, number of simulated experiments used to estimate the power.
     :param precision: (optional) int, number of decimals to round the power statistics to.
+    :param rand_seed: int (optional), random seed
     :return: power, dict
     """
-    mcmc = get_mcmc(stan_model, y1, y2)
+    if rand_seed is not None:
+        np.random.seed(int(rand_seed))
+
+    mcmc = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed)
     mcmc_chain = mcmc.extract()
 
     chain_length = len(mcmc_chain['mu'][:, 0])  # same as len(mcmc_chain[:, 1])
@@ -74,7 +78,7 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
         y2 = t.rvs(df=nu_val, loc=mu2_val, scale=sigma2_val, size=sample_size)
 
         # Get posterior for simulated data:
-        mcmc = get_mcmc(stan_model, y1, y2)  # tune input parameters
+        mcmc = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed)  # tune input parameters
         sim_chain = mcmc.extract()
 
         goal_tally = _update_goal_tally(sim_chain, 'mu', goal_tally, rope_m, max_hdi_width_m)
