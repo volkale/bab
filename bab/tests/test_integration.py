@@ -14,4 +14,3 @@ get_power(stan_model, y1, y2, 10, (-1., 1.), (0., 1.), 1., 1., n_sim=10)
 
 model = BayesAB()
 model.fit(2 * np.random.randn(10) + 3, np.random.randn(10))
-model.plot_all()
