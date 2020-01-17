@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name='bab',
-    version='0.0.1',
+    version='0.1.0',
     description='Bayesian estimation for A / B testing',
     author='Alexander Volkmann',
     author_email='alexv@gmx.de',

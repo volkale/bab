@@ -8,11 +8,10 @@ Bayesian estimation for two groups (e.g. A/B testing and Randomized Experiments)
 
 Based on the paper
 
-    John K. Kruschke, Bayesian estimation supersedes the t test., J Exp Psychol Gen. 2013
+   [John K. Kruschke, Bayesian estimation supersedes the t test., J Exp Psychol Gen. 2013](https://www.ncbi.nlm.nih.gov/pubmed/22774788)
 
 and the corresponding R-package by its author.
-We refer to [Kruschke's website](http://www.indiana.edu/~kruschke/BEST/) on
-[BEST](https://cran.r-project.org/web/packages/BEST/BEST.pdf) for more information.
+We refer to [BEST](https://cran.r-project.org/web/packages/BEST/BEST.pdf) for more information.
 
 This is a Python 3 library using [PyStan](https://pystan.readthedocs.io/en/latest/).
 
