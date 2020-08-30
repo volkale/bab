@@ -66,16 +66,7 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
     for step in step_idx:
         n_sim += 1
 
-        # Get parameter values for this simulation:
-        mu1_val = mcmc_chain['mu'][step, 0]
-        mu2_val = mcmc_chain['mu'][step, 1]
-        sigma1_val = mcmc_chain['sigma'][step, 0]
-        sigma2_val = mcmc_chain['sigma'][step, 1]
-        nu_val = mcmc_chain['nu'][step]
-
-        # Generate simulated data:
-        y1_sim = t.rvs(df=nu_val, loc=mu1_val, scale=sigma1_val, size=sample_size)
-        y2_sim = t.rvs(df=nu_val, loc=mu2_val, scale=sigma2_val, size=sample_size)
+        y1_sim, y2_sim = generate_simulated_data(mcmc_chain, sample_size, step)
 
         # Get posterior for simulated data:
         mcmc = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed)  # tune input parameters
@@ -99,6 +90,19 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
         power[k] = [round(e, precision) for e in v]
 
     return power
+
+
+def generate_simulated_data(mcmc_chain, sample_size, step):
+    # Get parameter values for this simulation:
+    mu1_val = mcmc_chain['mu'][step, 0]
+    mu2_val = mcmc_chain['mu'][step, 1]
+    sigma1_val = mcmc_chain['sigma'][step, 0]
+    sigma2_val = mcmc_chain['sigma'][step, 1]
+    nu_val = mcmc_chain['nu'][step]
+    # Generate simulated data:
+    y1_sim = t.rvs(df=nu_val, loc=mu1_val, scale=sigma1_val, size=sample_size)
+    y2_sim = t.rvs(df=nu_val, loc=mu2_val, scale=sigma2_val, size=sample_size)
+    return y1_sim, y2_sim
 
 
 def log_progress(n_sim, power, step_idx):
