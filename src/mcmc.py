@@ -54,7 +54,7 @@ def get_stan_model():
     return stan_model
 
 
-def get_model_input(y1, y2, w1, w2, prior_hyper_params):
+def get_model_input(y1, y2, w1=None, w2=None, prior_hyper_params=None):
 
     params = prior_hyper_params if prior_hyper_params is not None else {}
 
