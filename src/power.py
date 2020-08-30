@@ -152,8 +152,10 @@ def _update_goal_tally(sim_chain, variable, goal_tally, ROPE, maxHDIW):
 
 def get_hdi(samples, cred_mass=0.95):
     sorted_samples = sorted(samples)
-    ci_idx_inc = int(cred_mass * len(sorted_samples))
-    n_cis = len(sorted_samples) - ci_idx_inc
+    n_samples = len(sorted_samples)
+
+    ci_idx_inc = int(cred_mass * n_samples)
+    n_cis = n_samples - ci_idx_inc
 
     ci_width = n_cis * [0]
     for i in range(n_cis):
