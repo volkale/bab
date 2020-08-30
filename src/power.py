@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.stats import t, beta
 from scipy.optimize import fmin
 
-from bab.mcmc import get_mcmc
+from src.mcmc import get_mcmc
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
