@@ -93,13 +93,17 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
             power[k][1:] = get_hdi_of_lcdf(beta, cred_mass=cred_mass, a=a, b=b)
 
         if n_sim % 100 == 0:
-            logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
-            logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
+            log_progress(n_sim, power, step_idx)
 
     for k, v in power.items():
         power[k] = [round(e, precision) for e in v]
 
     return power
+
+
+def log_progress(n_sim, power, step_idx):
+    logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
+    logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
 
 
 def get_hdi_of_lcdf(dist_name, cred_mass=0.95, **args):
