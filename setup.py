@@ -16,7 +16,7 @@ with open('requirements_test.txt', 'r') as f:
 
 setup(
     name='bab',
-    version='0.1.2',
+    version='0.1.3',
     description='Bayesian estimation for A / B testing',
     author='Alexander Volkmann',
     author_email='alexv@gmx.de',
