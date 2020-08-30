@@ -63,22 +63,22 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
     }
 
     n_sim = 0
-    for i in step_idx:
+    for step in step_idx:
         n_sim += 1
 
         # Get parameter values for this simulation:
-        mu1_val = mcmc_chain['mu'][i, 0]
-        mu2_val = mcmc_chain['mu'][i, 1]
-        sigma1_val = mcmc_chain['sigma'][i, 0]
-        sigma2_val = mcmc_chain['sigma'][i, 1]
-        nu_val = mcmc_chain['nu'][i]
+        mu1_val = mcmc_chain['mu'][step, 0]
+        mu2_val = mcmc_chain['mu'][step, 1]
+        sigma1_val = mcmc_chain['sigma'][step, 0]
+        sigma2_val = mcmc_chain['sigma'][step, 1]
+        nu_val = mcmc_chain['nu'][step]
 
         # Generate simulated data:
-        y1 = t.rvs(df=nu_val, loc=mu1_val, scale=sigma1_val, size=sample_size)
-        y2 = t.rvs(df=nu_val, loc=mu2_val, scale=sigma2_val, size=sample_size)
+        y1_sim = t.rvs(df=nu_val, loc=mu1_val, scale=sigma1_val, size=sample_size)
+        y2_sim = t.rvs(df=nu_val, loc=mu2_val, scale=sigma2_val, size=sample_size)
 
         # Get posterior for simulated data:
-        mcmc = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed)  # tune input parameters
+        mcmc = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed)  # tune input parameters
         sim_chain = mcmc.extract()
 
         goal_tally = _update_goal_tally(sim_chain, 'mu', goal_tally, rope_m, max_hdi_width_m)
