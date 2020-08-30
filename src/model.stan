@@ -51,5 +51,5 @@ generated quantities {
     for (j in 1:N1) log_lik[j] = w1[j] * student_t_lpdf(y1[j] | nu, mu[1], sigma[1]);
 
     for (j in 1:n2) y2_pred[j] = student_t_rng(nu, mu[2], sigma[2]);
-    for (j in 1:N2) log_lik[n1 + j] = w2[j] * student_t_lpdf(y2[j] | nu, mu[2], sigma[2]);
+    for (j in 1:N2) log_lik[N1 + j] = w2[j] * student_t_lpdf(y2[j] | nu, mu[2], sigma[2]);
 }
