@@ -1,9 +1,9 @@
 import numpy as np
 
-from bab.mcmc import get_mcmc, get_stan_model
-from bab.make_data import make_data
-from bab.power import get_power
-from bab.model import BayesAB
+from src.mcmc import get_mcmc, get_stan_model
+from src.make_data import make_data
+from src.power import get_power
+from src.model import BayesAB
 
 
 y1, y2 = make_data(0, 1, 1, 2, 10, percent_outliers=0, sd_outlier_factor=2.0, rand_seed=1)

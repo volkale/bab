@@ -2,7 +2,7 @@ import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
 
-from bab.mcmc import get_stan_model, get_mcmc, plot_posteriors
+from src.mcmc import get_stan_model, get_mcmc, plot_posteriors
 
 
 class BayesAB:
@@ -20,8 +20,8 @@ class BayesAB:
         self.rope = kwargs.get('rope', {})
         self.ref_val = kwargs.get('ref_val', {})
 
-    def fit(self, y1, y2):
-        self.mcmc_ = get_mcmc(self.model, y1, y2, **self.kwargs)
+    def fit(self, y1, y2, w1=None, w2=None):
+        self.mcmc_ = get_mcmc(self.model, y1, y2, w1, w2, **self.kwargs)
 
         self.data_ = az.from_pystan(
             posterior=self.mcmc_,

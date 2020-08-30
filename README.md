@@ -4,7 +4,8 @@
 [![Build Status](https://travis-ci.com/volkale/bab.svg?token=9JgTwriYTrtamJ3cXPvS&branch=develop)](https://travis-ci.com/volkale/bab)
 [![codecov](https://codecov.io/gh/volkale/bab/branch/develop/graph/badge.svg)](https://codecov.io/gh/volkale/bab)
 
-Bayesian estimation for two groups (e.g. A/B testing and Randomized Experiments).
+Bayesian estimation for two groups (e.g. A/B testing and Randomized Experiments), assuming approximately
+normally (or student-t) distributed outcome variables.
 
 Based on the paper
 

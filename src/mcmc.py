@@ -1,9 +1,10 @@
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import os
 
-from bab.utils import stan_model_cache
+from src.stan_utils import stan_model_cache
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
@@ -12,11 +13,13 @@ logger.setLevel('INFO')
 plt.style.use('ggplot')
 
 
-def get_mcmc(stan_model, y1, y2, prior_hyper_params=None, warmup=1000, rand_seed=None):
+def get_mcmc(stan_model, y1, y2, w1=None, w2=None, prior_hyper_params=None, warmup=1000, rand_seed=None):
     """
     :param stan_model: StanModel instance
     :param y1: iterable, data from group 1 (test/active group)
     :param y2: iterable, data from group 2 (control/placebo group)
+    :param w1: iterable (optional), frequency of data from group 1 (test/active group)
+    :param w2: iterable (optional), frequency of data from group 2 (control/placebo group)
     :param prior_hyper_params: dict (optional), with keys 'muM', 'muP', 'sigmaLow', 'sigmaHigh'
     :param warmup: int (optional), number of burnin samples to use, defaults to 1000
     :param rand_seed: int (optional), random seed
@@ -26,7 +29,7 @@ def get_mcmc(stan_model, y1, y2, prior_hyper_params=None, warmup=1000, rand_seed
     if rand_seed is not None:
         np.random.seed(int(rand_seed))
 
-    input_data = get_model_input(y1, y2, prior_hyper_params)
+    input_data = get_model_input(y1, y2, w1, w2, prior_hyper_params)
 
     mcmc = stan_model.sampling(
         data=input_data,
@@ -51,7 +54,7 @@ def get_stan_model():
     return stan_model
 
 
-def get_model_input(y1, y2, prior_hyper_params):
+def get_model_input(y1, y2, w1=None, w2=None, prior_hyper_params=None):
 
     params = prior_hyper_params if prior_hyper_params is not None else {}
 
@@ -63,18 +66,17 @@ def get_model_input(y1, y2, prior_hyper_params):
         or none, in which case default priors are used.
         ''', exc_info=True)
 
-    nt = len(y1)
-    nc = len(y2)
-
-    y = np.concatenate([y1, y2])
-    mu_m = np.mean(y)
-    s_y = np.sqrt(((nt - 1) * np.var(y1, ddof=1) + (nc - 1) * np.var(y2, ddof=1)) / (nt + nc - 2))
+    y1, w1 = _get_aggregated_data(y1, weights=w1)
+    y2, w2 = _get_aggregated_data(y2, weights=w2)
+    mu_m, s_y = _get_prior_parameter_values(y1, y2, w1, w2)
 
     input_data = {
-        'N1': nt,
-        'N2': nc,
+        'N1': y1.shape[0],
+        'N2': y2.shape[0],
         'y1': y1,
         'y2': y2,
+        'w1': w1,
+        'w2': w2,
         'muM': params.get('muM', mu_m),
         'muP': params.get('muP', 100 * s_y),
         'sigmaLow': params.get('sigmaLow', s_y / 1000),
@@ -85,6 +87,28 @@ def get_model_input(y1, y2, prior_hyper_params):
     return input_data
 
 
+def _get_aggregated_data(outcome, weights=None):
+    if not weights:
+        weights = np.ones(len(outcome))
+    df = pd.DataFrame(list(zip(outcome, weights)), columns=['y', 'w']).groupby('y').agg({'w': 'sum'}).reset_index()
+    aggregated_outcome = df.y.values
+    consolidated_weights = df.w.values.astype(int)
+    del df
+    return aggregated_outcome, consolidated_weights
+
+
+def _get_prior_parameter_values(y1, y2, w1, w2):
+    n1 = np.sum(w1)
+    n2 = np.sum(w2)
+    y = np.concatenate([y1, y2])
+    w = np.concatenate([w1, w2])
+    mu_m = weighted_avg(y, w)
+    s_y = np.sqrt(
+        ((n1 - 1) * weighted_sample_var(y1, w1) + (n2 - 1) * weighted_sample_var(y2, w2)) / (n1 + n2 - 2)
+    )
+    return mu_m, s_y
+
+
 def plot_posteriors(mcmc, parameter):
     assert parameter in ('mu', 'sigma', 'nu')
 
@@ -93,3 +117,13 @@ def plot_posteriors(mcmc, parameter):
         _ = plt.hist(mcmc.extract()[parameter][:, 1], bins=100, density=True, alpha=0.5)  # NOQA
     else:
         _ = plt.hist(mcmc.extract()['nu'], bins=100, density=True, alpha=0.5)  # NOQA
+
+
+def weighted_avg(values, weights):
+    return np.average(values, weights=weights)
+
+
+def weighted_sample_var(values, weights):
+    average = weighted_avg(values, weights)
+    sample_variance = np.average((values - average) ** 2, weights=weights) * (np.sum(weights) / (np.sum(weights) - 1))
+    return sample_variance
