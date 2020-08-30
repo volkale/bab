@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import os
 
-from src.utils import stan_model_cache
+from src.stan_utils import stan_model_cache
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
@@ -66,35 +66,13 @@ def get_model_input(y1, y2, w1=None, w2=None, prior_hyper_params=None):
         or none, in which case default priors are used.
         ''', exc_info=True)
 
-    if not w1:
-        w1 = np.ones(len(y1))
-    if not w2:
-        w2 = np.ones(len(y2))
-
-    nt = np.sum(w1)
-    nc = np.sum(w2)
-
-    df1 = pd.DataFrame(list(zip(y1, w1)), columns=['y1', 'w1']).groupby('y1').agg({'w1': 'sum'}).reset_index()
-    y1 = df1.y1.values
-    w1 = df1.w1.values.astype(int)
-    N1 = df1.shape[0]
-    del df1
-    df2 = pd.DataFrame(list(zip(y2, w2)), columns=['y2', 'w2']).groupby('y2').agg({'w2': 'sum'}).reset_index()
-    y2 = df2.y2.values
-    w2 = df2.w2.values.astype(int)
-    N2 = df2.shape[0]
-    del df2
-
-    y = np.concatenate([y1, y2])
-    w = np.concatenate([w1, w2])
-    mu_m = weighted_avg(y, w)
-    s_y = np.sqrt(
-        ((nt - 1) * weighted_var(y1, w1) + (nc - 1) * weighted_var(y2, w2)) / (nt + nc - 2)
-    )
+    y1, w1 = _get_aggregated_data(y1, weights=w1)
+    y2, w2 = _get_aggregated_data(y2, weights=w2)
+    mu_m, s_y = _get_prior_parameter_values(y1, y2, w1, w2)
 
     input_data = {
-        'N1': N1,
-        'N2': N2,
+        'N1': y1.shape[0],
+        'N2': y2.shape[0],
         'y1': y1,
         'y2': y2,
         'w1': w1,
@@ -107,6 +85,28 @@ def get_model_input(y1, y2, w1=None, w2=None, prior_hyper_params=None):
     }
 
     return input_data
+
+
+def _get_aggregated_data(outcome, weights=None):
+    if not weights:
+        weights = np.ones(len(outcome))
+    df = pd.DataFrame(list(zip(outcome, weights)), columns=['y', 'w']).groupby('y').agg({'w': 'sum'}).reset_index()
+    aggregated_outcome = df.y.values
+    consolidated_weights = df.w.values.astype(int)
+    del df
+    return aggregated_outcome, consolidated_weights
+
+
+def _get_prior_parameter_values(y1, y2, w1, w2):
+    n1 = np.sum(w1)
+    n2 = np.sum(w2)
+    y = np.concatenate([y1, y2])
+    w = np.concatenate([w1, w2])
+    mu_m = weighted_avg(y, w)
+    s_y = np.sqrt(
+        ((n1 - 1) * weighted_sample_var(y1, w1) + (n2 - 1) * weighted_sample_var(y2, w2)) / (n1 + n2 - 2)
+    )
+    return mu_m, s_y
 
 
 def plot_posteriors(mcmc, parameter):
@@ -123,7 +123,7 @@ def weighted_avg(values, weights):
     return np.average(values, weights=weights)
 
 
-def weighted_var(values, weights):
+def weighted_sample_var(values, weights):
     average = weighted_avg(values, weights)
-    variance = np.average((values - average) ** 2, weights=weights) * (np.sum(weights) / (np.sum(weights) - 1))
-    return variance
+    sample_variance = np.average((values - average) ** 2, weights=weights) * (np.sum(weights) / (np.sum(weights) - 1))
+    return sample_variance
