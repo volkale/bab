@@ -23,11 +23,11 @@ which uses [PyMC](https://github.com/pymc-devs/pymc) for MCMC sampling.
 
 Create `conda` environment:
 
-    $ conda create --name bab python=3.7.2 -y
+    $ conda create --name bab python=3.7.3 -y
 
 Activate the conda environment:
 
-    $ source activate bab
+    $ conda activate bab
 
 For the installation of the `bab` package via pip just run:
 
