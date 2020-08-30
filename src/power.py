@@ -163,6 +163,5 @@ def get_hdi(samples, cred_mass=0.95):
 
     hdi_min = sorted_samples[np.argmin(ci_width)]
     hdi_max = sorted_samples[np.argmin(ci_width) + ci_idx_inc]
-    hdi = hdi_min, hdi_max
 
-    return hdi
+    return hdi_min, hdi_max
