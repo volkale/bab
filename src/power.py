@@ -66,7 +66,7 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
     for step in step_idx:
         n_sim += 1
 
-        y1_sim, y2_sim = generate_simulated_data(mcmc_chain, sample_size, step)
+        y1_sim, y2_sim = _generate_simulated_data(mcmc_chain, sample_size, step)
 
         # Get posterior for simulated data:
         mcmc = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed)  # tune input parameters
@@ -84,7 +84,7 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
             power[k][1:] = get_hdi_of_lcdf(beta, cred_mass=cred_mass, a=a, b=b)
 
         if n_sim % 100 == 0:
-            log_progress(n_sim, power, step_idx)
+            _log_progress(n_sim, power, step_idx)
 
     for k, v in power.items():
         power[k] = [round(e, precision) for e in v]
