@@ -92,7 +92,7 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
     return power
 
 
-def generate_simulated_data(mcmc_chain, sample_size, step):
+def _generate_simulated_data(mcmc_chain, sample_size, step):
     # Get parameter values for this simulation:
     mu1_val = mcmc_chain['mu'][step, 0]
     mu2_val = mcmc_chain['mu'][step, 1]
