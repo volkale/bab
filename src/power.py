@@ -105,7 +105,7 @@ def _generate_simulated_data(mcmc_chain, sample_size, step):
     return y1_sim, y2_sim
 
 
-def log_progress(n_sim, power, step_idx):
+def _log_progress(n_sim, power, step_idx):
     logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
     logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
 
