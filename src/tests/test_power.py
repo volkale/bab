@@ -24,7 +24,7 @@ def test_power(stan_model):
 
     y1, y2 = make_data(delta, 1, 0, 1, 10, percent_outliers=0, sd_outlier_factor=0, rand_seed=0)
 
-    power_dict = get_power(stan_model, y1, y2, n, (-.1, .1), (0., 1.), 1., 1.)
+    power_dict = get_power(stan_model, y1, y2, (-.1, .1), (0., 1.), 1., 1.)
     l, r = power_dict['HDIm in ROPE'][1:]
     bayesian_power = 1 - r  # 95 sure that the power is at least 1 - l
 

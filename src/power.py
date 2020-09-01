@@ -11,13 +11,12 @@ logger = logging.getLogger()
 logger.setLevel('INFO')
 
 
-def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m, max_hdi_width_sd,
+def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_width_sd,
               cred_mass=0.95, n_sim=200, precision=2, rand_seed=None):
     """
     :param stan_model: StanModel instance
     :param y1: iterable, prospective samples of group one
     :param y2: iterable, prospective samples of group two
-    :param sample_size: number of samples per group
     :param rope_m: iterable, of length two, such as (-1, 1),
         specifying the limit of the ROPE on the difference of means.
     :param rope_sd: iterable, of length two, such as (-1, 1),
@@ -32,6 +31,8 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
     """
     if rand_seed is not None:
         np.random.seed(int(rand_seed))
+
+    sample_size = len(y1)
 
     mcmc = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed)
     mcmc_chain = mcmc.extract()
