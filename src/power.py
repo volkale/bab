@@ -84,8 +84,7 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
             power[k][0] = a / (a + b)
             power[k][1:] = get_hdi_of_lcdf(beta, cred_mass=cred_mass, a=a, b=b)
 
-        if n_sim % 100 == 0:
-            _log_progress(n_sim, power, step_idx)
+        _log_progress(n_sim, power, step_idx)
 
     for k, v in power.items():
         power[k] = [round(e, precision) for e in v]
@@ -97,7 +96,6 @@ def _generate_simulated_data(mcmc_chain, sample_size, step):
     # Get parameter values for this simulation:
     y1_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 1)
     y2_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 2)
-
     return y1_sim, y2_sim
 
 
@@ -109,8 +107,9 @@ def _generate_data_for_group(mcmc_chain, sample_size, step, group):
 
 
 def _log_progress(n_sim, power, step_idx):
-    logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
-    logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
+    if n_sim % 100 == 0:
+        logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
+        logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
 
 
 def get_hdi_of_lcdf(dist_name, cred_mass=0.95, **args):
