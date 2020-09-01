@@ -95,18 +95,17 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
 
 def _generate_simulated_data(mcmc_chain, sample_size, step):
     # Get parameter values for this simulation:
-    nu_val = mcmc_chain['nu'][step]
-    y1_sim = _generate_data_for_group(mcmc_chain, nu_val, sample_size, step, 1)
-    y2_sim = _generate_data_for_group(mcmc_chain, nu_val, sample_size, step, 2)
+    y1_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 1)
+    y2_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 2)
 
     return y1_sim, y2_sim
 
 
-def _generate_data_for_group(mcmc_chain, nu_val, sample_size, step, group):
-    mu = mcmc_chain['mu'][step, group]
-    sigma = mcmc_chain['sigma'][step, group]
-    y_sim = t.rvs(df=nu_val, loc=mu, scale=sigma, size=sample_size)
-    return y_sim
+def _generate_data_for_group(mcmc_chain, sample_size, step, group):
+    return t.rvs(df=mcmc_chain['nu'][step],
+                 loc=mcmc_chain['mu'][step, group],
+                 scale=mcmc_chain['sigma'][step, group],
+                 size=sample_size)
 
 
 def _log_progress(n_sim, power, step_idx):
