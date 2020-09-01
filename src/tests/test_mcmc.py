@@ -5,13 +5,10 @@ from src.mcmc import get_mcmc
 def test_mcmc_random_seed(stan_model, two_group_sample_data):
     y1, y2 = two_group_sample_data
 
-    mcmc1 = get_mcmc(stan_model, y1, y2, rand_seed=1)
-    mcmc2 = get_mcmc(stan_model, y1, y2, rand_seed=1)
+    mcmc1 = get_mcmc(stan_model, y1, y2, rand_seed=1).extract()
+    mcmc2 = get_mcmc(stan_model, y1, y2, rand_seed=1).extract()
 
-    assert mcmc1.extract().keys() == mcmc2.extract().keys()
-
-    for parameter in mcmc1.extract().keys():
-        assert (mcmc1.extract()[parameter] == mcmc2.extract()[parameter]).all()
+    np.testing.assert_equal(mcmc1, mcmc2)
 
 
 def test_mcmc(stan_model, two_group_sample_data):

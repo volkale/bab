@@ -64,22 +64,13 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
     }
 
     n_sim = 0
-    for i in step_idx:
+    for step in step_idx:
         n_sim += 1
 
-        # Get parameter values for this simulation:
-        mu1_val = mcmc_chain['mu'][i, 0]
-        mu2_val = mcmc_chain['mu'][i, 1]
-        sigma1_val = mcmc_chain['sigma'][i, 0]
-        sigma2_val = mcmc_chain['sigma'][i, 1]
-        nu_val = mcmc_chain['nu'][i]
-
-        # Generate simulated data:
-        y1 = t.rvs(df=nu_val, loc=mu1_val, scale=sigma1_val, size=sample_size)
-        y2 = t.rvs(df=nu_val, loc=mu2_val, scale=sigma2_val, size=sample_size)
+        y1_sim, y2_sim = _generate_simulated_data(mcmc_chain, sample_size, step)
 
         # Get posterior for simulated data:
-        mcmc = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed)  # tune input parameters
+        mcmc = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed)  # tune input parameters
         sim_chain = mcmc.extract()
 
         goal_tally = _update_goal_tally(sim_chain, 'mu', goal_tally, rope_m, max_hdi_width_m)
@@ -94,13 +85,30 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
             power[k][1:] = get_hdi_of_lcdf(beta, cred_mass=cred_mass, a=a, b=b)
 
         if n_sim % 100 == 0:
-            logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
-            logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
+            _log_progress(n_sim, power, step_idx)
 
     for k, v in power.items():
         power[k] = [round(e, precision) for e in v]
 
     return power
+
+
+def _generate_simulated_data(mcmc_chain, sample_size, step):
+    # Get parameter values for this simulation:
+    mu1_val = mcmc_chain['mu'][step, 0]
+    mu2_val = mcmc_chain['mu'][step, 1]
+    sigma1_val = mcmc_chain['sigma'][step, 0]
+    sigma2_val = mcmc_chain['sigma'][step, 1]
+    nu_val = mcmc_chain['nu'][step]
+    # Generate simulated data:
+    y1_sim = t.rvs(df=nu_val, loc=mu1_val, scale=sigma1_val, size=sample_size)
+    y2_sim = t.rvs(df=nu_val, loc=mu2_val, scale=sigma2_val, size=sample_size)
+    return y1_sim, y2_sim
+
+
+def _log_progress(n_sim, power, step_idx):
+    logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
+    logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
 
 
 def get_hdi_of_lcdf(dist_name, cred_mass=0.95, **args):
@@ -145,8 +153,10 @@ def _update_goal_tally(sim_chain, variable, goal_tally, ROPE, maxHDIW):
 
 def get_hdi(samples, cred_mass=0.95):
     sorted_samples = sorted(samples)
-    ci_idx_inc = int(cred_mass * len(sorted_samples))
-    n_cis = len(sorted_samples) - ci_idx_inc
+    n_samples = len(sorted_samples)
+
+    ci_idx_inc = int(cred_mass * n_samples)
+    n_cis = n_samples - ci_idx_inc
 
     ci_width = n_cis * [0]
     for i in range(n_cis):
@@ -154,6 +164,5 @@ def get_hdi(samples, cred_mass=0.95):
 
     hdi_min = sorted_samples[np.argmin(ci_width)]
     hdi_max = sorted_samples[np.argmin(ci_width) + ci_idx_inc]
-    hdi = hdi_min, hdi_max
 
-    return hdi
+    return hdi_min, hdi_max
