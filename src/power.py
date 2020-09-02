@@ -34,8 +34,7 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
 
     sample_size = len(y1)
 
-    mcmc = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed)
-    mcmc_chain = mcmc.extract()
+    mcmc_chain = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed).extract()
 
     chain_length = len(mcmc_chain['mu'][:, 0])  # same as len(mcmc_chain[:, 1])
     # Select thinned steps in chain for posterior predictions:
@@ -69,9 +68,7 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
 
         y1_sim, y2_sim = _generate_simulated_data(mcmc_chain, sample_size, step)
 
-        # Get posterior for simulated data:
-        mcmc = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed)  # tune input parameters
-        sim_chain = mcmc.extract()
+        sim_chain = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed).extract()
 
         goal_tally = _update_goal_tally(goal_tally, max_hdi_width_m, max_hdi_width_sd, rope_m, rope_sd, sim_chain)
 
