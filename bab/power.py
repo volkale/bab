@@ -98,8 +98,8 @@ def _assess_and_tally_goals(cred_mass, goal_tally, n_sim, power):
 
 def _generate_simulated_data(mcmc_chain, sample_size, step):
     # Get parameter values for this simulation:
-    y1_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 1)
-    y2_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 2)
+    y1_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 0)
+    y2_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 1)
     return y1_sim, y2_sim
 
 
