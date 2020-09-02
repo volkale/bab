@@ -131,36 +131,24 @@ def get_hdi_of_lcdf(dist_name, cred_mass=0.95, **args):
     # return interval as array([low, high])
     return distri.ppf([hdi_low_tail_pr, cred_mass + hdi_low_tail_pr])
 
-def _update_goal(goal_tally, max_hdi_width_m, max_hdi_width_sd, rope_m, rope_sd, sim_chain):
-    for variable, max_hdi_width, rope in [
-        ('mu', max_hdi_width_m, rope_m),
-        ('sigma', max_hdi_width_sd, rope_sd)
+def _update_goal_tally(goal_tally, max_hdi_width_m, max_hdi_width_sd, rope_m, rope_sd, sim_chain):
+    for variable, v, max_hdi_width, rope in [
+        ('mu', 'm', max_hdi_width_m, rope_m),
+        ('sigma', 'sd', max_hdi_width_sd, rope_sd)
     ]:
-        goal_tally = _update_goal_tally(sim_chain, variable, goal_tally, rope, max_hdi_width)
+        hdim_l, hdim_r = get_hdi(sim_chain[variable][:, 0] - sim_chain[variable][:, 1])
+
+        if hdim_l > rope[1]:
+            goal_tally['HDI{} > ROPE'.format(v)] += 1
+        elif hdim_r < rope[0]:
+            goal_tally['HDI{} < ROPE'.format(v)] += 1
+        elif rope[0] < hdim_l and hdim_r < rope[1]:
+            goal_tally['HDI{} in ROPE'.format(v)] += 1
+        else:
+            pass
+        if hdim_r - hdim_l < max_hdi_width:
+            goal_tally['HDI{} width < max'.format(v)] += 1
     return goal_tally
-
-def _update_goal_tally(sim_chain, variable, goal_tally, rope, max_hdi_width):
-
-    hdim_l, hdim_r = get_hdi(sim_chain[variable][:, 0] - sim_chain[variable][:, 1])
-
-    if variable == 'mu':
-        v = 'm'
-    elif variable == 'sigma':
-        v = 'sd'
-    else:
-        raise ValueError('variable argument must be either "mu" or "sigma".')
-    if hdim_l > rope[1]:
-        goal_tally['HDI{} > ROPE'.format(v)] += 1
-    elif hdim_r < rope[0]:
-        goal_tally['HDI{} < ROPE'.format(v)] += 1
-    elif rope[0] < hdim_l and hdim_r < rope[1]:
-        goal_tally['HDI{} in ROPE'.format(v)] += 1
-    else:
-        pass
-    if hdim_r - hdim_l < max_hdi_width:
-        goal_tally['HDI{} width < max'.format(v)] += 1
-    return goal_tally
-
 
 def get_hdi(samples, cred_mass=0.95):
     sorted_samples = sorted(samples)
