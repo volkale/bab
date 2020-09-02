@@ -76,20 +76,21 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
         goal_tally = _update_goal_tally(sim_chain, 'mu', goal_tally, rope_m, max_hdi_width_m)
         goal_tally = _update_goal_tally(sim_chain, 'sigma', goal_tally, rope_sd, max_hdi_width_sd)
 
-        # Assess which goals were achieved and tally them:
-
-        for k, v in goal_tally.items():
-            a = 1 + v
-            b = 1 + (n_sim - v)
-            power[k][0] = a / (a + b)
-            power[k][1:] = get_hdi_of_lcdf(beta, cred_mass=cred_mass, a=a, b=b)
-
         _log_progress(n_sim, power, step_idx)
 
     for k, v in power.items():
         power[k] = [round(e, precision) for e in v]
 
     return power
+
+
+def _assess_and_tally_goals(cred_mass, goal_tally, n_sim, power):
+    # Assess which goals were achieved and tally them:
+    for k, v in goal_tally.items():
+        a = 1 + v
+        b = 1 + (n_sim - v)
+        power[k][0] = a / (a + b)
+        power[k][1:] = get_hdi_of_lcdf(beta, cred_mass=cred_mass, a=a, b=b)
 
 
 def _generate_simulated_data(mcmc_chain, sample_size, step):
