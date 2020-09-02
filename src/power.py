@@ -71,9 +71,8 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
 
         # Get posterior for simulated data:
         mcmc = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed)  # tune input parameters
-        sim_chain = mcmc.extract()
 
-        goal_tally = _update_goal_tally(sim_chain, goal_tally, rope_m, max_hdi_width_m)
+        goal_tally = _update_goal_tally(mcmc.extract(), goal_tally, rope_m, max_hdi_width_m)
 
         _assess_and_tally_goals(cred_mass, goal_tally, n_sim, power)
 
