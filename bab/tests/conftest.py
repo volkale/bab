@@ -1,5 +1,5 @@
 import pytest
-from src.mcmc import get_stan_model
+from bab.mcmc import get_stan_model
 
 
 @pytest.fixture

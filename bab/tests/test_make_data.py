@@ -1,5 +1,5 @@
 import numpy as np
-from src.make_data import make_data
+from bab.make_data import make_data
 
 
 def test_make_data():
