@@ -73,7 +73,7 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
         mcmc = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed)  # tune input parameters
         sim_chain = mcmc.extract()
 
-        goal_tally = _update_goal(goal_tally, max_hdi_width_m, max_hdi_width_sd, rope_m, rope_sd, sim_chain)
+        goal_tally = _update_goal_tally(goal_tally, max_hdi_width_m, max_hdi_width_sd, rope_m, rope_sd, sim_chain)
 
         _assess_and_tally_goals(cred_mass, goal_tally, n_sim, power)
 
@@ -131,6 +131,7 @@ def get_hdi_of_lcdf(dist_name, cred_mass=0.95, **args):
     # return interval as array([low, high])
     return distri.ppf([hdi_low_tail_pr, cred_mass + hdi_low_tail_pr])
 
+
 def _update_goal_tally(goal_tally, max_hdi_width_m, max_hdi_width_sd, rope_m, rope_sd, sim_chain):
     for variable, v, max_hdi_width, rope in [
         ('mu', 'm', max_hdi_width_m, rope_m),
@@ -149,6 +150,7 @@ def _update_goal_tally(goal_tally, max_hdi_width_m, max_hdi_width_sd, rope_m, ro
         if hdim_r - hdim_l < max_hdi_width:
             goal_tally['HDI{} width < max'.format(v)] += 1
     return goal_tally
+
 
 def get_hdi(samples, cred_mass=0.95):
     sorted_samples = sorted(samples)
