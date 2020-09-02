@@ -2,7 +2,7 @@ import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.mcmc import get_stan_model, get_mcmc, plot_posteriors
+from bab.mcmc import get_stan_model, get_mcmc, plot_posteriors
 
 
 class BayesAB:

@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import stats
-from src.make_data import make_data
-from src.power import get_power
+from bab.make_data import make_data
+from bab.power import get_power
 
 
 np.random.seed(1)
