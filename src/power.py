@@ -36,9 +36,7 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
 
     mcmc_chain = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed).extract()
 
-    chain_length = len(mcmc_chain['mu'][:, 0])  # same as len(mcmc_chain[:, 1])
-    # Select thinned steps in chain for posterior predictions:
-    step_idx = list(range(1, chain_length, int(chain_length / n_sim)))
+    step_idx = _get_step_indices(mcmc_chain, n_sim)
 
     goal_tally = {
         'HDIm > ROPE': 0,
@@ -80,6 +78,13 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
         power[k] = [round(e, precision) for e in v]
 
     return power
+
+
+def _get_step_indices(mcmc_chain, n_sim):
+    chain_length = len(mcmc_chain['mu'][:, 0])  # same as len(mcmc_chain[:, 1])
+    # Select thinned steps in chain for posterior predictions:
+    step_idx = list(range(1, chain_length, int(chain_length / n_sim)))
+    return step_idx
 
 
 def _assess_and_tally_goals(cred_mass, goal_tally, n_sim, power):
