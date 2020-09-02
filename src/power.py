@@ -73,8 +73,9 @@ def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_widt
         mcmc = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed)  # tune input parameters
         sim_chain = mcmc.extract()
 
-        goal_tally = _update_goal_tally(sim_chain, 'mu', goal_tally, rope_m, max_hdi_width_m)
-        goal_tally = _update_goal_tally(sim_chain, 'sigma', goal_tally, rope_sd, max_hdi_width_sd)
+        goal_tally = _update_goal_tally(sim_chain, goal_tally, rope_m, max_hdi_width_m)
+
+        _assess_and_tally_goals(cred_mass, goal_tally, n_sim, power)
 
         _log_progress(n_sim, power, step_idx)
 
@@ -131,26 +132,27 @@ def get_hdi_of_lcdf(dist_name, cred_mass=0.95, **args):
     return distri.ppf([hdi_low_tail_pr, cred_mass + hdi_low_tail_pr])
 
 
-def _update_goal_tally(sim_chain, variable, goal_tally, ROPE, maxHDIW):
-    hdim_l, hdim_r = get_hdi(sim_chain[variable][:, 0] - sim_chain[variable][:, 1])
+def _update_goal_tally(sim_chain, goal_tally, ROPE, maxHDIW):
+    for variable in ["mu", "sigma"]:
+        hdim_l, hdim_r = get_hdi(sim_chain[variable][:, 0] - sim_chain[variable][:, 1])
 
-    if variable == 'mu':
-        v = 'm'
-    elif variable == 'sigma':
-        v = 'sd'
-    else:
-        raise ValueError('variable argument must be either "mu" or "sigma".')
-    if hdim_l > ROPE[1]:
-        goal_tally['HDI{} > ROPE'.format(v)] += 1
-    elif hdim_r < ROPE[0]:
-        goal_tally['HDI{} < ROPE'.format(v)] += 1
-    elif ROPE[0] < hdim_l and hdim_r < ROPE[1]:
-        goal_tally['HDI{} in ROPE'.format(v)] += 1
-    else:
-        pass
-    if hdim_r - hdim_l < maxHDIW:
-        goal_tally['HDI{} width < max'.format(v)] += 1
-    return goal_tally
+        if variable == 'mu':
+            v = 'm'
+        elif variable == 'sigma':
+            v = 'sd'
+        else:
+            raise ValueError('variable argument must be either "mu" or "sigma".')
+        if hdim_l > ROPE[1]:
+            goal_tally['HDI{} > ROPE'.format(v)] += 1
+        elif hdim_r < ROPE[0]:
+            goal_tally['HDI{} < ROPE'.format(v)] += 1
+        elif ROPE[0] < hdim_l and hdim_r < ROPE[1]:
+            goal_tally['HDI{} in ROPE'.format(v)] += 1
+        else:
+            pass
+        if hdim_r - hdim_l < maxHDIW:
+            goal_tally['HDI{} width < max'.format(v)] += 1
+        return goal_tally
 
 
 def get_hdi(samples, cred_mass=0.95):
