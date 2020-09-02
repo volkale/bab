@@ -1,5 +1,5 @@
 import numpy as np
-from src.mcmc import get_mcmc
+from bab.mcmc import get_mcmc
 
 
 def test_mcmc_random_seed(stan_model, two_group_sample_data):

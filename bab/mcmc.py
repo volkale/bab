@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import os
 
-from src.stan_utils import stan_model_cache
+from bab.stan_utils import stan_model_cache
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
