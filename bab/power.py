@@ -11,13 +11,12 @@ logger = logging.getLogger()
 logger.setLevel('INFO')
 
 
-def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m, max_hdi_width_sd,
+def get_power(stan_model, y1, y2, rope_m, rope_sd, max_hdi_width_m, max_hdi_width_sd,
               cred_mass=0.95, n_sim=200, precision=2, rand_seed=None):
     """
     :param stan_model: StanModel instance
     :param y1: iterable, prospective samples of group one
     :param y2: iterable, prospective samples of group two
-    :param sample_size: number of samples per group
     :param rope_m: iterable, of length two, such as (-1, 1),
         specifying the limit of the ROPE on the difference of means.
     :param rope_sd: iterable, of length two, such as (-1, 1),
@@ -33,12 +32,11 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
     if rand_seed is not None:
         np.random.seed(int(rand_seed))
 
-    mcmc = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed)
-    mcmc_chain = mcmc.extract()
+    sample_size = len(y1)
 
-    chain_length = len(mcmc_chain['mu'][:, 0])  # same as len(mcmc_chain[:, 1])
-    # Select thinned steps in chain for posterior predictions:
-    step_idx = list(range(1, chain_length, int(chain_length / n_sim)))
+    mcmc_chain = get_mcmc(stan_model, y1, y2, rand_seed=rand_seed).extract()
+
+    step_idx = _get_step_indices(mcmc_chain, n_sim)
 
     goal_tally = {
         'HDIm > ROPE': 0,
@@ -68,23 +66,13 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
 
         y1_sim, y2_sim = _generate_simulated_data(mcmc_chain, sample_size, step)
 
-        # Get posterior for simulated data:
-        mcmc = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed)  # tune input parameters
-        sim_chain = mcmc.extract()
+        sim_chain = get_mcmc(stan_model, y1_sim, y2_sim, rand_seed=rand_seed).extract()
 
-        goal_tally = _update_goal_tally(sim_chain, 'mu', goal_tally, rope_m, max_hdi_width_m)
-        goal_tally = _update_goal_tally(sim_chain, 'sigma', goal_tally, rope_sd, max_hdi_width_sd)
+        goal_tally = _update_goal_tally(goal_tally, max_hdi_width_m, max_hdi_width_sd, rope_m, rope_sd, sim_chain)
 
-        # Assess which goals were achieved and tally them:
+        _assess_and_tally_goals(cred_mass, goal_tally, n_sim, power)
 
-        for k, v in goal_tally.items():
-            a = 1 + v
-            b = 1 + (n_sim - v)
-            power[k][0] = a / (a + b)
-            power[k][1:] = get_hdi_of_lcdf(beta, cred_mass=cred_mass, a=a, b=b)
-
-        if n_sim % 100 == 0:
-            _log_progress(n_sim, power, step_idx)
+        _log_progress(n_sim, power, step_idx)
 
     for k, v in power.items():
         power[k] = [round(e, precision) for e in v]
@@ -92,22 +80,40 @@ def get_power(stan_model, y1, y2, sample_size, rope_m, rope_sd, max_hdi_width_m,
     return power
 
 
+def _get_step_indices(mcmc_chain, n_sim):
+    chain_length = len(mcmc_chain['mu'][:, 0])  # same as len(mcmc_chain[:, 1])
+    # Select thinned steps in chain for posterior predictions:
+    step_idx = list(range(1, chain_length, int(chain_length / n_sim)))
+    return step_idx
+
+
+def _assess_and_tally_goals(cred_mass, goal_tally, n_sim, power):
+    # Assess which goals were achieved and tally them:
+    for k, v in goal_tally.items():
+        a = 1 + v
+        b = 1 + (n_sim - v)
+        power[k][0] = a / (a + b)
+        power[k][1:] = get_hdi_of_lcdf(beta, cred_mass=cred_mass, a=a, b=b)
+
+
 def _generate_simulated_data(mcmc_chain, sample_size, step):
     # Get parameter values for this simulation:
-    mu1_val = mcmc_chain['mu'][step, 0]
-    mu2_val = mcmc_chain['mu'][step, 1]
-    sigma1_val = mcmc_chain['sigma'][step, 0]
-    sigma2_val = mcmc_chain['sigma'][step, 1]
-    nu_val = mcmc_chain['nu'][step]
-    # Generate simulated data:
-    y1_sim = t.rvs(df=nu_val, loc=mu1_val, scale=sigma1_val, size=sample_size)
-    y2_sim = t.rvs(df=nu_val, loc=mu2_val, scale=sigma2_val, size=sample_size)
+    y1_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 0)
+    y2_sim = _generate_data_for_group(mcmc_chain, sample_size, step, 1)
     return y1_sim, y2_sim
 
 
+def _generate_data_for_group(mcmc_chain, sample_size, step, group):
+    return t.rvs(df=mcmc_chain['nu'][step],
+                 loc=mcmc_chain['mu'][step, group],
+                 scale=mcmc_chain['sigma'][step, group],
+                 size=sample_size)
+
+
 def _log_progress(n_sim, power, step_idx):
-    logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
-    logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
+    if n_sim % 100 == 0:
+        logging.info('Power after {} of {} simulations: '.format(n_sim, len(step_idx)))
+        logging.info(pd.DataFrame(power, index=['mean', 'CrIlo', 'CrIhi']).T)
 
 
 def get_hdi_of_lcdf(dist_name, cred_mass=0.95, **args):
@@ -128,25 +134,23 @@ def get_hdi_of_lcdf(dist_name, cred_mass=0.95, **args):
     return distri.ppf([hdi_low_tail_pr, cred_mass + hdi_low_tail_pr])
 
 
-def _update_goal_tally(sim_chain, variable, goal_tally, ROPE, maxHDIW):
-    hdim_l, hdim_r = get_hdi(sim_chain[variable][:, 0] - sim_chain[variable][:, 1])
+def _update_goal_tally(goal_tally, max_hdi_width_m, max_hdi_width_sd, rope_m, rope_sd, sim_chain):
+    for variable, v, max_hdi_width, rope in [
+        ('mu', 'm', max_hdi_width_m, rope_m),
+        ('sigma', 'sd', max_hdi_width_sd, rope_sd)
+    ]:
+        hdim_l, hdim_r = get_hdi(sim_chain[variable][:, 0] - sim_chain[variable][:, 1])
 
-    if variable == 'mu':
-        v = 'm'
-    elif variable == 'sigma':
-        v = 'sd'
-    else:
-        raise ValueError('variable argument must be either "mu" or "sigma".')
-    if hdim_l > ROPE[1]:
-        goal_tally['HDI{} > ROPE'.format(v)] += 1
-    elif hdim_r < ROPE[0]:
-        goal_tally['HDI{} < ROPE'.format(v)] += 1
-    elif ROPE[0] < hdim_l and hdim_r < ROPE[1]:
-        goal_tally['HDI{} in ROPE'.format(v)] += 1
-    else:
-        pass
-    if hdim_r - hdim_l < maxHDIW:
-        goal_tally['HDI{} width < max'.format(v)] += 1
+        if hdim_l > rope[1]:
+            goal_tally['HDI{} > ROPE'.format(v)] += 1
+        elif hdim_r < rope[0]:
+            goal_tally['HDI{} < ROPE'.format(v)] += 1
+        elif rope[0] < hdim_l and hdim_r < rope[1]:
+            goal_tally['HDI{} in ROPE'.format(v)] += 1
+        else:
+            pass
+        if hdim_r - hdim_l < max_hdi_width:
+            goal_tally['HDI{} width < max'.format(v)] += 1
     return goal_tally
 
 
